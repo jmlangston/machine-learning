@@ -1,0 +1,1 @@
+Please see the Jupyter notebook `writeup.ipynb` to see the Chicago crime data analysis.
