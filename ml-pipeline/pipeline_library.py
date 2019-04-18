@@ -7,53 +7,89 @@ import pandas as pd
 
 def load_csv_data(filename):
 	'''
-	TODO
+	Takes a CSV file and loads it into a pandas dataframe
+
+	Input:
+		filename (str) - CSV filename
+	Returns:
+		pandas dataframe
 	'''
 	return pd.read_csv(filename)
 
 
-def show_data_summary(df, col=None):
+def show_data_summary(df):
 	'''
-	TODO
+	Prints a summary of the data in a pandas dataframe: head (first five rows),
+	column names and corresponding data types, and descriptive statistics.
+
+	Input:
+		df (pandas dataframe)
+	Returns:
+		nothing
 	'''
 	print(df.head())
+	print("")
 	print(df.dtypes)
+	print("")
 	print(df.describe())
-	df["colname"].describe()
-	print(df.corr(method="pearson"))
-
-	# remember: just do what will be helpful for this data
-	# will modify for other types of data later
-
-	# also: implemen for this data in another file
-	# this module should be reusable
 
 
-def show_histogram(df):
+def show_label_detail(df, label):
 	'''
-	TODO
+	Show detail about the label, i.e. the outcome variable of interest. This
+	function assumes the label is a binary variable coded as 0 for
+	"no"/"false" and 1 for "yes"/"true"
+
+	Input:
+		df (pandas dataframe)
+		label (str) - name of the column being used as the ML model label
+			(i.e. outcome variable)
 	'''
-	# can change column name
-	col = "Age Group"
+	print("Label value counts")
+	print(df[label].value_counts())
+	print("")
+	print("Proportion of 'yes' observations")
+	print(df[label].sum() / df.shape[0])
+
+
+def show_histogram(df, col):
+	'''
+	Show a histogram of the data in the specified dataframe column
+
+	Inputs:
+		df (pandas dataframe)
+		col (str) - column name
+	'''
 	df[col].value_counts().plot(kind="bar")
-	# try plt.hist()
-	# plt.hist(df["Age Group"])
-
-	# try histogram splitting on outcome variable
 
 
 def show_correlation(df, cols=None):
 	'''
+	Show the correlation between all combinations of columns, or, if the
+	optional parameter cols is passed in, show correlation between the
+	specified columns
+
+	Input:
+		df (pandas dataframe)
+		cols (pair)
+	Returns:
+		pandas dataframe of numpy float
+	'''
+	if cols:
+		col1, col2 = cols
+		return df[col1].corr(df[col2], method="pearson")
+
+	return df.corr(method="pearson")
+
+
+def preprocess_data(df):
+	'''
 	TODO
 	'''
-	df.corr(method="pearson")
-	df["PersonID"].corr(df["SeriousDlqin2yrs"], method="pearson")
 
 
-def detect_outliers(df):
-	'''
-	TODO
 
-	https://stackoverflow.com/questions/23199796/detect-and-exclude-outliers-in-pandas-data-frame
-	'''
-	pass
+# FEATURES
+# label - "SeriousDlqin2yrs"
+# not sure about - PersonID, zipcode
+# features - rest of the columns
