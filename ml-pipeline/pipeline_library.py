@@ -60,7 +60,7 @@ def show_histogram(df, col):
 		df (pandas dataframe)
 		col (str) - column name
 	'''
-	df[col].value_counts().plot(kind="bar")
+	print(df[col].value_counts().plot(kind="bar"))
 
 
 def show_correlation(df, cols=None):
@@ -103,8 +103,36 @@ def preprocess_data(df):
 	df.fillna(value=fill_values, inplace=True)
 
 
+def make_discrete(df, col, bins, labels):
+	'''
+	Transform the given continuous variable column into a discrete variable.
 
-# FEATURES
-# label - "SeriousDlqin2yrs"
-# not sure about - PersonID, zipcode
-# features - rest of the columns
+	Inputs:
+		df (pandas dataframe)
+		col (string) - name of column to transform
+		bins (list of ints) - boundaries for new discrete variable
+		labels (list of strings) - labels for bins
+	Returns:
+		nothing - modifies dataframe in place
+	'''
+	df[col] = pd.cut( \
+		df[col], bins=bins, labels=labels, include_lowest=True, right=False)
+
+
+def make_dummy(df, col):
+	'''
+	Make dummy variables from the given discrete numerical variable column.
+	Dummy variable will be coded as 0 when the original variable takes a value
+	of 0 and 1 when the variable takes on a value of 1 or more.
+
+	Inputs:
+		df (pandas dataframe)
+		col (string) - name of column to make dummy from
+	Returns:
+		nothing - modifies dataframe in place
+	'''
+	# pd.get_dummies(df, col) # use when column has fewer categories
+
+	new_col = col + "_dummy"
+	df[new_col] = 0
+	df[new_col][df[col] >= 1] = 1
