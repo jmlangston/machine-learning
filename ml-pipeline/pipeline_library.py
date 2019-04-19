@@ -84,8 +84,23 @@ def show_correlation(df, cols=None):
 
 def preprocess_data(df):
 	'''
-	TODO
+	Find columns with null values and fill those null values with the mean
+	value of the column.
+
+	Input:
+		df (pandas dataframe)
+	Returns:
+		nothing - modifies dataframe in place
 	'''
+	fill_values = {}
+	for col, has_null in df.isnull().any().iteritems():
+		if has_null:
+			mean = df[col].mean()
+			num_nulls = df[col].isnull().sum()
+			fill_values[col] = mean
+			print("Replacing {} nulls in column {} with mean value {}".format(num_nulls, col, mean))
+
+	df.fillna(value=fill_values, inplace=True)
 
 
 
