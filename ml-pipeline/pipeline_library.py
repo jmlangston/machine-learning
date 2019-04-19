@@ -1,8 +1,11 @@
 '''
 Library of functions for use in machine learning pipeline
 '''
-
+import numpy as np
 import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.cross_validation import train_test_split
+from sklearn.metrics import accuracy_score as accuracy
 
 
 def load_csv_data(filename):
@@ -136,3 +139,64 @@ def make_dummy(df, col):
 	new_col = col + "_dummy"
 	df[new_col] = 0
 	df[new_col][df[col] >= 1] = 1
+
+
+def split_data(df, selected_features, label, test_size):
+	'''
+	Using the columns specified as features, split the data to obtain
+	X and y training and testing sets.
+
+	Inputs:
+		df (pandas dataframe)
+		selected_features (list of strings) - names of columns to be used as
+			features
+		label (string) - name of column to be used as the label
+		test_size - proportion of data to use as testing data
+	Returns:
+		array containing x_train, x_test, y_train, and y_test dataframes
+	'''
+	X = df[selected_features]
+	y = df[label]
+
+	return train_test_split(X, y, test_size=test_size)
+
+
+def fit_decision_tree(x_train, y_train):
+	'''
+	Use the training X and y data to fit the decision tree.
+
+	Inputs:
+		x_train (pandas dataframe) - features training data
+		y_train (pandas dataframe) - label training data
+	Outputs:
+		dec_tree (DecisionTreeClassifier object)
+	'''
+	dec_tree = DecisionTreeClassifier()
+	dec_tree.fit(x_train, y_train)
+
+	return dec_tree
+
+
+def evaluate_model(trained_model, x_test, y_test, threshold):
+	'''
+	Evaluate the accuracy of the trained model.
+
+	Inputs:
+		trained_model (DecisionTreeClassifier object)
+		x_test (pandas dataframe) - features testing data
+		y_test (pandas dataframe) - label testing data
+		threshold (float) - if predicted score is above this threshold, 		consider it to be an accurate prediction
+	Outputs:
+		test_acc (float)
+
+	Source: Code borrowed/modified from ML for Public Policy lab 2
+	'''
+	predicted_scores_test = trained_model.predict_proba(x_test)[:,1]
+	# plt.hist(predicted_scores_test)
+
+	calc_threshold = lambda x, y: 0 if x < y else 1
+	predicted_test = np.array( \
+		[calc_threshold(score, threshold) for score in predicted_scores_test])
+	test_acc = accuracy(predicted_test, y_test)
+
+	return test_acc
