@@ -125,15 +125,16 @@ def make_discrete(df, col, bins, labels):
 		df[col], bins=bins, labels=labels, include_lowest=True, right=False)
 
 
-def make_dummy(df, col):
+def make_dummy(df, col, cutoff):
 	'''
 	Make dummy variables from the given discrete numerical variable column.
 	Dummy variable will be coded as 0 when the original variable takes a value
-	of 0 and 1 when the variable takes on a value of 1 or more.
+	of 0 and 1 when the variable takes on a value of the given cutoff or more.
 
 	Inputs:
 		df (pandas dataframe)
 		col (string) - name of column to make dummy from
+		cutoff (int or float) - value above which dummy var should equal 1
 	Returns:
 		nothing - modifies dataframe in place
 	'''
@@ -141,7 +142,7 @@ def make_dummy(df, col):
 
 	new_col = col + "_dummy"
 	df[new_col] = 0
-	df[new_col][df[col] >= 1] = 1
+	df.loc[df[col] >= cutoff, new_col] = 1
 
 
 def split_data(df, selected_features, label, test_size):
