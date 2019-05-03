@@ -7,7 +7,7 @@ Library of functions for use in machine learning pipeline
 import numpy as np
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score as accuracy
 
 
@@ -88,6 +88,20 @@ def show_correlation(df, cols=None):
 	return df.corr(method="pearson")
 
 
+def cols_to_datetime(df, cols):
+	'''
+	Convert one or more columns of a dataframe to datetime type.
+
+	Input:
+		df (pandas dataframe)
+		cols (list of strings) - columns to convert
+	Returns:
+		nothing - modifies dataframe in place
+	'''
+	for col in cols:
+		df[col] = pd.to_datetime(df[col])
+
+
 def preprocess_data(df):
 	'''
 	Find columns with null values and fill those null values with the mean
@@ -125,7 +139,7 @@ def make_discrete(df, col, bins, labels):
 		df[col], bins=bins, labels=labels, include_lowest=True, right=False)
 
 
-def make_dummy(df, col, cutoff):
+def make_dummy(df, col, cutoff, gt_cutoff=True, new_col=None):
 	'''
 	Make dummy variables from the given discrete numerical variable column.
 	Dummy variable will be coded as 0 when the original variable takes a value
@@ -135,14 +149,23 @@ def make_dummy(df, col, cutoff):
 		df (pandas dataframe)
 		col (string) - name of column to make dummy from
 		cutoff (int or float) - value above which dummy var should equal 1
+		gt_cutoff (boolean) - if True, the dummy variable should take a
+			value of 1 if the value is greater than the cutoff. Pass False
+			when the dummy should equal 1 if the value is less than cutoff
+		new_col (string) - optional argument to specify name of new column,
+			otherwise defaults to adding "_dummy" suffix to original col name
 	Returns:
 		nothing - modifies dataframe in place
 	'''
 	# pd.get_dummies(df, col) # use when column has fewer categories
 
-	new_col = col + "_dummy"
+	if not new_col:
+		new_col = col + "_dummy"
 	df[new_col] = 0
-	df.loc[df[col] >= cutoff, new_col] = 1
+	if gt_cutoff:
+		df.loc[df[col] >= cutoff, new_col] = 1
+	else:
+		df.loc[df[col] <= cutoff, new_col] = 1
 
 
 def split_data(df, selected_features, label, test_size):
