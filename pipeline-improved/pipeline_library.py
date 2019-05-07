@@ -11,16 +11,17 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score as accuracy
 
 
-def load_csv_data(filename):
+def load_csv_data(filename, dtype=None):
 	'''
 	Takes a CSV file and loads it into a pandas dataframe
 
 	Input:
 		filename (str) - CSV filename
+		dtypes (dict) - optional dictionary mapping column names to data types
 	Returns:
 		pandas dataframe
 	'''
-	return pd.read_csv(filename)
+	return pd.read_csv(filename, dtype=dtype)
 
 
 def show_data_summary(df):
@@ -139,11 +140,12 @@ def make_discrete(df, col, bins, labels):
 		df[col], bins=bins, labels=labels, include_lowest=True, right=False)
 
 
-def make_dummy(df, col, cutoff, gt_cutoff=True, new_col=None):
+def make_dummy_from_continuous(df, col, cutoff, gt_cutoff=True, new_col=None):
 	'''
-	Make dummy variables from the given discrete numerical variable column.
+	Make dummy variable column from the given numerical variable column.
 	Dummy variable will be coded as 0 when the original variable takes a value
-	of 0 and 1 when the variable takes on a value of the given cutoff or more.
+	below the cutoff and 1 when the variable takes on a value of the given
+	cutoff or more (or vice versa, if gt_cutoff is set to False).
 
 	Inputs:
 		df (pandas dataframe)
@@ -166,6 +168,46 @@ def make_dummy(df, col, cutoff, gt_cutoff=True, new_col=None):
 		df.loc[df[col] >= cutoff, new_col] = 1
 	else:
 		df.loc[df[col] <= cutoff, new_col] = 1
+
+
+def make_dummy_from_categorical(df, col, map_to_dummy, new_col=None):
+	'''
+	Make dummy variable column from the given categorical variable column.
+	Dummy variable will be coded as 1 for all values in the list argument
+	map_to_dummy and 0 otherwise.
+
+	Inputs:
+		df (pandas dataframe)
+		col (string) - name of column to make dummy from
+		map_to_dummy (list) - values that should map to 1 in the dummy column
+		new_col (string) - optional argument to specify name of new column,
+			otherwise defaults to adding "_dummy" suffix to original col name
+	Returns:
+		nothing - modifies dataframe in place
+	'''
+	if not new_col:
+		new_col = col + "_dummy"
+	df[new_col] = 0
+	for val in map_to_dummy:
+		df.loc[df[col] == val, new_col] = 1
+
+
+def rename_values(df, col, names):
+	'''
+	Given a dictionary of mappings of current names/values to new names/values,
+	update the values in the specified column. For example, if in column "A"
+	we want to change all instances of the value "Yes" into "Y", the names dict
+	should contain a key-value pair {"Yes": "Y"}.
+
+	Inputs:
+		df (pandas dataframe)
+		col (string) - name of column
+		names (dict) - maps current names to desired names for values in column
+	Returns:
+		nothing - modifies dataframe in place
+	'''
+	for old_name, new_name in names.items():
+		df.loc[df[col] == old_name, col] = new_name
 
 
 def split_data(df, selected_features, label, test_size):
