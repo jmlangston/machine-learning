@@ -103,23 +103,37 @@ def cols_to_datetime(df, cols):
 		df[col] = pd.to_datetime(df[col])
 
 
-def preprocess_data(df):
+def fill_na_with(df, method, cols=None):
 	'''
-	Find columns with null values and fill those null values with the mean
-	value of the column.
+	Find columns with null values and fill those null values with the mean, median, or mode value of the column.
 
 	Input:
 		df (pandas dataframe)
+		method (string) - measure of center to use to fill null values
+		cols (list of strings) - columns to check for null values. If None,
+			fill nulls in all columns
 	Returns:
 		nothing - modifies dataframe in place
 	'''
+	if not cols:
+		cols = []
+		for col, has_null in df.isnull().any().iteritems():
+			if has_null:
+				cols.append(col)
+
 	fill_values = {}
-	for col, has_null in df.isnull().any().iteritems():
-		if has_null:
-			mean = df[col].mean()
-			num_nulls = df[col].isnull().sum()
-			fill_values[col] = mean
-			print("Replacing {} nulls in column {} with mean value {}".format(num_nulls, col, mean))
+	for col in cols:
+		if method == "mean":
+			val = df[col].mean()
+		if method == "median":
+			val = df[col].median()
+		if method == "mode":
+			val = df[col].mode()[0]
+
+		num_nulls = df[col].isnull().sum()
+		fill_values[col] = val
+		print("Replacing {} nulls in column {} with {} value {}".format( \
+			num_nulls, col, method, val))
 
 	df.fillna(value=fill_values, inplace=True)
 
@@ -159,8 +173,6 @@ def make_dummy_from_continuous(df, col, cutoff, gt_cutoff=True, new_col=None):
 	Returns:
 		nothing - modifies dataframe in place
 	'''
-	# pd.get_dummies(df, col) # use when column has fewer categories
-
 	if not new_col:
 		new_col = col + "_dummy"
 	df[new_col] = 0
