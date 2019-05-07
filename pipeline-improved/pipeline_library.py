@@ -7,6 +7,7 @@ Library of functions for use in machine learning pipeline
 import numpy as np
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score as accuracy
 
@@ -105,7 +106,8 @@ def cols_to_datetime(df, cols):
 
 def fill_na_with(df, method, cols=None):
 	'''
-	Find columns with null values and fill those null values with the mean, median, or mode value of the column.
+	Find columns with null values and fill those null values with the mean,
+	median, or mode value of the column.
 
 	Input:
 		df (pandas dataframe)
@@ -258,13 +260,23 @@ def fit_decision_tree(x_train, y_train):
 	return dec_tree
 
 
-def evaluate_model(trained_model, x_test, y_test, threshold):
+def fit_knn_classifier(x_train, y_train, n_neighbors):
+	'''
+	TODO
+	'''
+	knn = KNeighborsClassifier(n_neighbors=10, metric="minkowski")
+	knn.fit(x_train, y_train)
+
+	return knn
+
+
+def evaluate_model(predicted_scores, y_test, threshold):
 	'''
 	Evaluate the accuracy of the trained model.
 
 	Inputs:
-		trained_model (DecisionTreeClassifier object)
-		x_test (pandas dataframe) - features testing data
+		predicted_scores (numpy array) - a list of probabilities, one for each
+			test data point, that the data point belongs to class 1
 		y_test (pandas dataframe) - label testing data
 		threshold (float) - if predicted score is above this threshold, 		consider it to be an accurate prediction
 	Outputs:
@@ -272,12 +284,13 @@ def evaluate_model(trained_model, x_test, y_test, threshold):
 
 	Source: Code borrowed/modified from ML for Public Policy lab 2
 	'''
-	predicted_scores_test = trained_model.predict_proba(x_test)[:,1]
+	# predicted_scores_test = trained_model.predict_proba(x_test)[:,1]
 	# plt.hist(predicted_scores_test)
 
 	calc_threshold = lambda x, y: 0 if x < y else 1
-	predicted_test = np.array( \
-		[calc_threshold(score, threshold) for score in predicted_scores_test])
-	test_acc = accuracy(predicted_test, y_test)
+	predictions = np.array( \
+		[calc_threshold(score, threshold) for score in predicted_scores])
+	
+	test_acc = accuracy(predictions, y_test)
 
-	return test_acc
+	print("Model accuracy is {}".format(test_acc))
