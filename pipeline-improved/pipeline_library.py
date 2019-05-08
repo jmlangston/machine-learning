@@ -12,6 +12,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score as accuracy
+from sklearn.metrics import precision_score as precision
+from sklearn.metrics import recall_score as recall
 
 
 def load_csv_data(filename, dtype=None):
@@ -301,9 +303,9 @@ def fit_svm(x_train, y_train, C=1.0):
 	return svm
 
 
-def evaluate_model(predicted_scores, y_test, threshold):
+def calculate_accuracy(predicted_scores, y_test, threshold):
 	'''
-	Evaluate the accuracy of the trained model.
+	Calculate the accuracy of the trained model.
 
 	Inputs:
 		predicted_scores (numpy array) - a list of probabilities, one for each
@@ -322,6 +324,45 @@ def evaluate_model(predicted_scores, y_test, threshold):
 	predictions = np.array( \
 		[calc_threshold(score, threshold) for score in predicted_scores])
 	
-	test_acc = accuracy(predictions, y_test)
+	test_acc = accuracy(y_test, predictions)
 
-	print("Model accuracy is {}".format(test_acc))
+	return test_acc
+
+
+def calculate_precision(predicted_scores, y_test, threshold):
+	'''
+	TODO
+	'''
+	calc_threshold = lambda x, y: 0 if x < y else 1
+	predictions = np.array( \
+		[calc_threshold(score, threshold) for score in predicted_scores])
+
+	test_precision = precision(y_test, predictions)
+
+	return test_precision
+
+
+def calculate_recall(predicted_scores, y_test, threshold):
+	'''
+	TODO
+	'''
+	calc_threshold = lambda x, y: 0 if x < y else 1
+	predictions = np.array( \
+		[calc_threshold(score, threshold) for score in predicted_scores])
+
+	test_recall = recall(y_test, predictions)
+
+	return test_recall
+
+
+def evaluate_model(predicted_scores, y_test, threshold):
+	'''
+	TODO
+	'''
+	accuracy = calculate_accuracy(predicted_scores, y_test, threshold)
+	precision = calculate_precision(predicted_scores, y_test, threshold)
+	recall = calculate_recall(predicted_scores, y_test, threshold)
+
+	print("Model accuracy is {}".format(accuracy))
+	print("Model precision is {}".format(precision))
+	print("Model recall is {}".format(recall))
