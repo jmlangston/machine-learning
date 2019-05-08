@@ -10,6 +10,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
+from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score as accuracy
 from sklearn.metrics import precision_score as precision
@@ -284,7 +286,15 @@ def fit_knn_classifier(x_train, y_train, n_neighbors):
 
 def fit_logistic_regression(x_train, y_train, penalty="l2", C=1.0):
 	'''
-	TODO
+	Use the training X and y data to fit a logistic regression model.
+
+	Inputs:
+		x_train (pandas dataframe) - features training data
+		y_train (pandas dataframe) - label training data
+		penalty (string) - "l1" or "l2"
+		C (float) - inverse of regularization strength
+	Outputs:
+		lr (LogisticRegression object)
 	'''
 	lr = LogisticRegression( \
 		penalty=penalty, C=C, random_state=0, solver="liblinear")
@@ -295,12 +305,67 @@ def fit_logistic_regression(x_train, y_train, penalty="l2", C=1.0):
 
 def fit_svm(x_train, y_train, C=1.0):
 	'''
-	TODO
+	Use the training X and y data to fit a Support Vector Machine model.
+
+	Inputs:
+		x_train (pandas dataframe) - features training data
+		y_train (pandas dataframe) - label training data
+		C (float) - inverse of regularization strength
+	Outputs:
+		svm (LinearSVC object)
 	'''
 	svm = LinearSVC(C=C, random_state=0, tol=0.00001)
 	svm.fit(x_train, y_train)
 
 	return svm
+
+
+def fit_bagging_classifier(x_train, y_train):
+	'''
+	Use the training X and y data to fit a bagging classification model.
+
+	Inputs:
+		x_train (pandas dataframe) - features training data
+		y_train (pandas dataframe) - label training data
+	Outputs:
+		bag (BaggingClassifier object)
+	'''
+	bag = BaggingClassifier()
+	bag.fit(x_train, y_train)
+
+	return bag
+
+
+def fit_boosting_classifier(x_train, y_train):
+	'''
+	Use the training X and y data to fit a boosting classification model.
+
+	Inputs:
+		x_train (pandas dataframe) - features training data
+		y_train (pandas dataframe) - label training data
+	Outputs:
+		boost (AdaBoostClassifier object)
+	'''
+	boost = AdaBoostClassifier()
+	boost.fit(x_train, y_train)
+
+	return boost
+
+
+def fit_rf_classifier(x_train, y_train):
+	'''
+	Use the training X and y data to fit a random forest classification model.
+
+	Inputs:
+		x_train (pandas dataframe) - features training data
+		y_train (pandas dataframe) - label training data
+	Outputs:
+		rf (RandomForestClassifier object)
+	'''
+	rf = RandomForestClassifier()
+	rf.fit(x_train, y_train)
+
+	return rf
 
 
 def calculate_accuracy(predicted_scores, y_test, threshold):
@@ -331,7 +396,15 @@ def calculate_accuracy(predicted_scores, y_test, threshold):
 
 def calculate_precision(predicted_scores, y_test, threshold):
 	'''
-	TODO
+	Calculate the precision of the trained model.
+
+	Inputs:
+		predicted_scores (numpy array) - a list of probabilities, one for each
+			test data point, that the data point belongs to class 1
+		y_test (pandas dataframe) - label testing data
+		threshold (float) - if predicted score is above this threshold, 		consider it to be an accurate prediction
+	Outputs:
+		test_precision (float)
 	'''
 	calc_threshold = lambda x, y: 0 if x < y else 1
 	predictions = np.array( \
@@ -344,7 +417,15 @@ def calculate_precision(predicted_scores, y_test, threshold):
 
 def calculate_recall(predicted_scores, y_test, threshold):
 	'''
-	TODO
+	Calculate the recall of the trained model.
+
+	Inputs:
+		predicted_scores (numpy array) - a list of probabilities, one for each
+			test data point, that the data point belongs to class 1
+		y_test (pandas dataframe) - label testing data
+		threshold (float) - if predicted score is above this threshold, 		consider it to be an accurate prediction
+	Outputs:
+		test_recall (float)
 	'''
 	calc_threshold = lambda x, y: 0 if x < y else 1
 	predictions = np.array( \
@@ -357,7 +438,15 @@ def calculate_recall(predicted_scores, y_test, threshold):
 
 def evaluate_model(predicted_scores, y_test, threshold):
 	'''
-	TODO
+	Calculate all evaluation metrics of the trained model.
+
+	Inputs:
+		predicted_scores (numpy array) - a list of probabilities, one for each
+			test data point, that the data point belongs to class 1
+		y_test (pandas dataframe) - label testing data
+		threshold (float) - if predicted score is above this threshold, 		consider it to be an accurate prediction
+	Outputs:
+		nothing - prints the results
 	'''
 	accuracy = calculate_accuracy(predicted_scores, y_test, threshold)
 	precision = calculate_precision(predicted_scores, y_test, threshold)
