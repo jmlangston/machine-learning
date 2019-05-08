@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score as accuracy
 
@@ -276,6 +278,27 @@ def fit_knn_classifier(x_train, y_train, n_neighbors):
 	knn.fit(x_train, y_train)
 
 	return knn
+
+
+def fit_logistic_regression(x_train, y_train, penalty="l2", C=1.0):
+	'''
+	TODO
+	'''
+	lr = LogisticRegression( \
+		penalty=penalty, C=C, random_state=0, solver="liblinear")
+	lr.fit(x_train, y_train)
+
+	return lr
+
+
+def fit_svm(x_train, y_train, C=1.0):
+	'''
+	TODO
+	'''
+	svm = LinearSVC(C=C, random_state=0, tol=0.00001)
+	svm.fit(x_train, y_train)
+
+	return svm
 
 
 def evaluate_model(predicted_scores, y_test, threshold):
