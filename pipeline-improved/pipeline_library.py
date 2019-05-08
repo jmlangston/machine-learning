@@ -16,6 +16,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score as accuracy
 from sklearn.metrics import precision_score as precision
 from sklearn.metrics import recall_score as recall
+from sklearn.metrics import f1_score
 
 
 def load_csv_data(filename, dtype=None):
@@ -368,27 +369,49 @@ def fit_rf_classifier(x_train, y_train):
 	return rf
 
 
+def get_predictions_with_threshold(predicted_scores, threshold):
+	'''
+	Take list of predicted scores (i.e. probability that a data point belongs
+	to class 1) and determine its prediction based on the given threshold.
+	For example: if the threshold is 0.5, then a row for which the probability
+	that the actual class is 1 is greater than 0.5, count that row as
+	belonging to class 1.
+
+	Inputs:
+		predicted_scores (numpy array) - probabilities that data points belong
+			to class 1
+		threshold (float) - if predicted score is above this threshold,
+			consider it to be class 1
+
+	Outputs:
+		predictions (numpy array)
+
+	Source: Code borrowed/modified from ML for Public Policy lab 2
+	'''
+	calc_threshold = lambda x, y: 0 if x < y else 1
+	predictions = np.array( \
+		[calc_threshold(score, threshold) for score in predicted_scores])
+
+	return predictions
+
+
 def calculate_accuracy(predicted_scores, y_test, threshold):
 	'''
 	Calculate the accuracy of the trained model.
 
 	Inputs:
-		predicted_scores (numpy array) - a list of probabilities, one for each
-			test data point, that the data point belongs to class 1
+		predicted_scores (numpy array) - probabilities that data points belong
+			to class 1
 		y_test (pandas dataframe) - label testing data
-		threshold (float) - if predicted score is above this threshold, 		consider it to be an accurate prediction
+		threshold (float) - if predicted score is above this threshold,
+			consider it to be class 1
 	Outputs:
 		test_acc (float)
-
-	Source: Code borrowed/modified from ML for Public Policy lab 2
 	'''
 	# predicted_scores_test = trained_model.predict_proba(x_test)[:,1]
 	# plt.hist(predicted_scores_test)
 
-	calc_threshold = lambda x, y: 0 if x < y else 1
-	predictions = np.array( \
-		[calc_threshold(score, threshold) for score in predicted_scores])
-	
+	predictions = get_predictions_with_threshold(predicted_scores, threshold)
 	test_acc = accuracy(y_test, predictions)
 
 	return test_acc
@@ -399,17 +422,15 @@ def calculate_precision(predicted_scores, y_test, threshold):
 	Calculate the precision of the trained model.
 
 	Inputs:
-		predicted_scores (numpy array) - a list of probabilities, one for each
-			test data point, that the data point belongs to class 1
+		predicted_scores (numpy array) - probabilities that data points belong
+			to class 1
 		y_test (pandas dataframe) - label testing data
-		threshold (float) - if predicted score is above this threshold, 		consider it to be an accurate prediction
+		threshold (float) - if predicted score is above this threshold,
+			consider it to be class 1
 	Outputs:
 		test_precision (float)
 	'''
-	calc_threshold = lambda x, y: 0 if x < y else 1
-	predictions = np.array( \
-		[calc_threshold(score, threshold) for score in predicted_scores])
-
+	predictions = get_predictions_with_threshold(predicted_scores, threshold)
 	test_precision = precision(y_test, predictions)
 
 	return test_precision
@@ -420,20 +441,37 @@ def calculate_recall(predicted_scores, y_test, threshold):
 	Calculate the recall of the trained model.
 
 	Inputs:
-		predicted_scores (numpy array) - a list of probabilities, one for each
-			test data point, that the data point belongs to class 1
+		predicted_scores (numpy array) - probabilities that data points belong
+			to class 1
 		y_test (pandas dataframe) - label testing data
-		threshold (float) - if predicted score is above this threshold, 		consider it to be an accurate prediction
+		threshold (float) - if predicted score is above this threshold,
+			consider it to be class 1
 	Outputs:
 		test_recall (float)
 	'''
-	calc_threshold = lambda x, y: 0 if x < y else 1
-	predictions = np.array( \
-		[calc_threshold(score, threshold) for score in predicted_scores])
-
+	predictions = get_predictions_with_threshold(predicted_scores, threshold)
 	test_recall = recall(y_test, predictions)
 
 	return test_recall
+
+
+def calculate_f1(predicted_scores, y_test, threshold):
+	'''
+	Calculate the F1 metric of the trained model.
+
+	Inputs:
+		predicted_scores (numpy array) - probabilities that data points belong
+			to class 1
+		y_test (pandas dataframe) - label testing data
+		threshold (float) - if predicted score is above this threshold,
+			consider it to be class 1
+	Outputs:
+		f1 (float)
+	'''
+	predictions = get_predictions_with_threshold(predicted_scores, threshold)
+	f1 = f1_score(y_test, predictions)
+
+	return f1
 
 
 def evaluate_model(predicted_scores, y_test, threshold):
@@ -444,14 +482,16 @@ def evaluate_model(predicted_scores, y_test, threshold):
 		predicted_scores (numpy array) - a list of probabilities, one for each
 			test data point, that the data point belongs to class 1
 		y_test (pandas dataframe) - label testing data
-		threshold (float) - if predicted score is above this threshold, 		consider it to be an accurate prediction
+		threshold (float) - if predicted score is above this threshold, 		consider it to be a correct prediction
 	Outputs:
 		nothing - prints the results
 	'''
 	accuracy = calculate_accuracy(predicted_scores, y_test, threshold)
 	precision = calculate_precision(predicted_scores, y_test, threshold)
 	recall = calculate_recall(predicted_scores, y_test, threshold)
+	f1 = calculate_f1(predicted_scores, y_test, threshold)
 
 	print("Model accuracy is {}".format(accuracy))
 	print("Model precision is {}".format(precision))
 	print("Model recall is {}".format(recall))
+	print("Model F1 is {}".format(f1))
