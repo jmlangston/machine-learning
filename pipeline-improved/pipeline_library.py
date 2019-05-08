@@ -262,9 +262,17 @@ def fit_decision_tree(x_train, y_train):
 
 def fit_knn_classifier(x_train, y_train, n_neighbors):
 	'''
-	TODO
+	Use the training X and y data to fit a k-nearest neighbors classification
+	model.
+
+	Inputs:
+		x_train (pandas dataframe) - features training data
+		y_train (pandas dataframe) - label training data
+		n_neighbors (int) - number of neighbors to use in the model
+	Outputs:
+		knn (KNeighborsClassifier object)
 	'''
-	knn = KNeighborsClassifier(n_neighbors=10, metric="minkowski")
+	knn = KNeighborsClassifier(n_neighbors, metric="minkowski")
 	knn.fit(x_train, y_train)
 
 	return knn
