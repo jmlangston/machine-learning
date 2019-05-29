@@ -2,7 +2,17 @@
 Jessica Langston
 CAPP 30254 Homework 5 - Fix and Update Homework 3
 
-Library of functions for use in machine learning pipeline
+Library of functions for use in machine learning pipeline.
+
+General steps of the pipeline are as follows:
+
+1. Load the data
+2. Explore the data
+3. Preprocess and clean the data
+4. Generate features for the machine learning model
+5. Build the machine learning model
+6. Evaluate the machine learning model
+
 '''
 import numpy as np
 import pandas as pd
@@ -19,6 +29,12 @@ from sklearn.metrics import recall_score as recall
 from sklearn.metrics import f1_score
 
 
+##########
+#
+# Load data
+#
+##########
+
 def load_csv_data(filename, dtype=None):
 	'''
 	Takes a CSV file and loads it into a pandas dataframe
@@ -31,6 +47,12 @@ def load_csv_data(filename, dtype=None):
 	'''
 	return pd.read_csv(filename, dtype=dtype)
 
+
+##########
+#
+# Explore data
+#
+##########
 
 def show_data_summary(df):
 	'''
@@ -97,6 +119,12 @@ def show_correlation(df, cols=None):
 	return df.corr(method="pearson")
 
 
+##########
+#
+# Preprocess data
+#
+##########
+
 def cols_to_datetime(df, cols):
 	'''
 	Convert one or more columns of a dataframe to datetime type.
@@ -146,6 +174,12 @@ def fill_na_with(df, method, cols=None):
 
 	df.fillna(value=fill_values, inplace=True)
 
+
+##########
+#
+# Prepare features
+#
+##########
 
 def make_discrete(df, col, bins, labels):
 	'''
@@ -231,6 +265,12 @@ def rename_values(df, col, names):
 		df.loc[df[col] == old_name, col] = new_name
 
 
+##########
+#
+# Build model
+#
+##########
+
 def split_data(df, selected_features, label, test_size):
 	'''
 	Using the columns specified as features, split the data to obtain
@@ -251,123 +291,53 @@ def split_data(df, selected_features, label, test_size):
 	return train_test_split(X, y, test_size=test_size)
 
 
-def fit_decision_tree(x_train, y_train):
+def fit_classifier(x_train, y_train, method, params=None):
 	'''
-	Use the training X and y data to fit the decision tree.
+	Use the training X and y data to fit the specified classification model.
+
+	Supported classifier types:
+		"DT" - decision tree
+		"KNN" - K nearest neighbors
+		"LR" - logistic regression
+		"SVM" - support vector machine
+		"BAG" - bagging
+		"BST" - boosting
+		"RF" - random forest
 
 	Inputs:
 		x_train (pandas dataframe) - features training data
 		y_train (pandas dataframe) - label training data
+		method (str) - which type of classification model to train
+		params (dict) - parameters for sklearn
+
 	Outputs:
-		dec_tree (DecisionTreeClassifier object)
+		classifier object of specified type
 	'''
-	dec_tree = DecisionTreeClassifier()
-	dec_tree.fit(x_train, y_train)
+	classifiers = {
+		"DT": DecisionTreeClassifier,
+		"KNN": KNeighborsClassifier,
+		"LR": LogisticRegression,
+		"SVM": LinearSVC,
+		"BAG": BaggingClassifier,
+		"BST": AdaBoostClassifier,
+		"RF": RandomForestClassifier
+	}
 
-	return dec_tree
+	if params:
+		model = classifiers[method](**params)
+	else:
+		model = classifiers[method]()
 
+	model.fit(x_train, y_train)
 
-def fit_knn_classifier(x_train, y_train, n_neighbors):
-	'''
-	Use the training X and y data to fit a k-nearest neighbors classification
-	model.
-
-	Inputs:
-		x_train (pandas dataframe) - features training data
-		y_train (pandas dataframe) - label training data
-		n_neighbors (int) - number of neighbors to use in the model
-	Outputs:
-		knn (KNeighborsClassifier object)
-	'''
-	knn = KNeighborsClassifier(n_neighbors, metric="minkowski")
-	knn.fit(x_train, y_train)
-
-	return knn
+	return model
 
 
-def fit_logistic_regression(x_train, y_train, penalty="l2", C=1.0):
-	'''
-	Use the training X and y data to fit a logistic regression model.
-
-	Inputs:
-		x_train (pandas dataframe) - features training data
-		y_train (pandas dataframe) - label training data
-		penalty (string) - "l1" or "l2"
-		C (float) - inverse of regularization strength
-	Outputs:
-		lr (LogisticRegression object)
-	'''
-	lr = LogisticRegression( \
-		penalty=penalty, C=C, random_state=0, solver="liblinear")
-	lr.fit(x_train, y_train)
-
-	return lr
-
-
-def fit_svm(x_train, y_train, C=1.0):
-	'''
-	Use the training X and y data to fit a Support Vector Machine model.
-
-	Inputs:
-		x_train (pandas dataframe) - features training data
-		y_train (pandas dataframe) - label training data
-		C (float) - inverse of regularization strength
-	Outputs:
-		svm (LinearSVC object)
-	'''
-	svm = LinearSVC(C=C, random_state=0, tol=0.00001)
-	svm.fit(x_train, y_train)
-
-	return svm
-
-
-def fit_bagging_classifier(x_train, y_train):
-	'''
-	Use the training X and y data to fit a bagging classification model.
-
-	Inputs:
-		x_train (pandas dataframe) - features training data
-		y_train (pandas dataframe) - label training data
-	Outputs:
-		bag (BaggingClassifier object)
-	'''
-	bag = BaggingClassifier()
-	bag.fit(x_train, y_train)
-
-	return bag
-
-
-def fit_boosting_classifier(x_train, y_train):
-	'''
-	Use the training X and y data to fit a boosting classification model.
-
-	Inputs:
-		x_train (pandas dataframe) - features training data
-		y_train (pandas dataframe) - label training data
-	Outputs:
-		boost (AdaBoostClassifier object)
-	'''
-	boost = AdaBoostClassifier()
-	boost.fit(x_train, y_train)
-
-	return boost
-
-
-def fit_rf_classifier(x_train, y_train):
-	'''
-	Use the training X and y data to fit a random forest classification model.
-
-	Inputs:
-		x_train (pandas dataframe) - features training data
-		y_train (pandas dataframe) - label training data
-	Outputs:
-		rf (RandomForestClassifier object)
-	'''
-	rf = RandomForestClassifier()
-	rf.fit(x_train, y_train)
-
-	return rf
-
+##########
+#
+# Evaluate model
+#
+##########
 
 def get_predictions_with_threshold(predicted_scores, threshold):
 	'''
