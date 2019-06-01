@@ -26,7 +26,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score as accuracy
 from sklearn.metrics import precision_score as precision
 from sklearn.metrics import recall_score as recall
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score as f1
 
 
 ##########
@@ -295,6 +295,7 @@ def fit_classifier(x_train, y_train, method, params=None):
 	'''
 	Use the training X and y data to fit the specified classification model.
 
+	# TODO - remove
 	Supported classifier types:
 		"DT" - decision tree
 		"KNN" - K nearest neighbors
@@ -363,6 +364,23 @@ def get_predictions_with_threshold(predicted_scores, threshold):
 		[calc_threshold(score, threshold) for score in predicted_scores])
 
 	return predictions
+
+
+def calculate_metric(predicted_scores, y_test, threshold, metric):
+	'''
+	TODO
+	'''
+	metrics = {
+		"accuracy": accuracy,
+		"precision": precision,
+		"recall": recall,
+		"f1": f1
+	}
+
+	predictions = get_predictions_with_threshold(predicted_scores, threshold)
+	metric_value = metrics[metric](y_test, predictions)
+
+	return metric_value
 
 
 def calculate_accuracy(predicted_scores, y_test, threshold):
@@ -461,7 +479,14 @@ def evaluate_model(predicted_scores, y_test, threshold):
 	recall = calculate_recall(predicted_scores, y_test, threshold)
 	f1 = calculate_f1(predicted_scores, y_test, threshold)
 
-	print("Model accuracy is {}".format(accuracy))
-	print("Model precision is {}".format(precision))
-	print("Model recall is {}".format(recall))
-	print("Model F1 is {}".format(f1))
+	# print("Model accuracy is {}".format(accuracy))
+	# print("Model precision is {}".format(precision))
+	# print("Model recall is {}".format(recall))
+	# print("Model F1 is {}".format(f1))
+
+	return (accuracy, precision, recall, F1)
+
+
+def build_and_evaluate_models(model_params,):
+	'''
+	'''
